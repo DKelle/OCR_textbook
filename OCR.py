@@ -4,14 +4,16 @@ from threading import Thread, Lock
 import logging
 
 logging.basicConfig(filename='alerts.log',level=logging.INFO)
-PAGES = 3621
-THREADS= 100
+PAGES = 6 
+THREADS = 3
+PAGE_PER_THREAD = PAGES / THREADS
 
-def OCR(page):
-    for i in range(page, PAGES, PAGES/100):
-        page_number = page + i
-        info('starting thread {}!'.format(page_number))
-        print 'staring thread {}'.format(page_number)
+def OCR(thread):
+    for i in range(PAGE_PER_THREAD*thread, PAGE_PER_THREAD*thread+PAGE_PER_THREAD):
+        page_number = i
+
+        info('starting thread {} at page! {}'.format(thread, page_number))
+        print 'staring thread {} at page {}'.format(thread, page_number)
         pdf_name = 'wong/wong-page{}.pdf'.format(page_number)
         tiff_name = 'tiff/img-page{}.tiff'.format(page_number)
         save_name = 'output/wong{}.txt'.format(page_number)
@@ -21,11 +23,11 @@ def OCR(page):
 
         try:
             info('TO TIFF: Thread {} starting...'.format(page_number))
-            process = subprocess.Popen(convert_to_tiff_command.split(), stdout=subprocess.PIPE)
+            process = subprocess.Popen(convert_to_tiff_command.split())
             output, error = process.communicate()
             info('output, error {} {}'.format(output, error))
             info('TO SAVE FILE: Thread {} starting...'.format(page_number))
-            process = subprocess.Popen(ocr_command.split(), stdout=subprocess.PIPE)
+            process = subprocess.Popen(ocr_command.split())
             output, error = process.communicate()
             info('output, error {} {}'.format(output, error))
         except Exception as e:
